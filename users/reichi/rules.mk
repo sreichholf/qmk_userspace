@@ -1,0 +1,1 @@
+SRC += reichi.c
