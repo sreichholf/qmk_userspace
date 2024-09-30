@@ -2,10 +2,21 @@
 
 #if 1
 
+#define RGB_DEFAULT 0x01, 0xc6, 0xff
+#define RGB_HIGHLIGHT 0xa2, 0x00, 0xff
+
 void keyboard_post_init_user(void) {
     rgb_matrix_enable();
     rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
-    rgb_matrix_set_color_all(0x01,0xc6,0xff);
+    rgb_matrix_set_color_all(RGB_DEFAULT);
+}
+
+void rgb_default_or_off(uint8_t index, uint8_t layer, keypos_t keypos, RGB defaultColor) {
+    if (keymap_key_to_keycode(layer, keypos) == KC_TRNS) {
+        rgb_matrix_set_color(index, defaultColor.r, defaultColor.g, defaultColor.b);
+    } else if (keymap_key_to_keycode(layer, keypos) == KC_NO) {
+        rgb_matrix_set_color(index, RGB_OFF);
+    }
 }
 
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
@@ -21,23 +32,21 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
                   if (keymap_key_to_keycode(layer, keypos) > KC_TRNS) {
                     switch(layer) {
                         case 1:
-                            rgb_matrix_set_color(index, RGB_RED);
+                            rgb_matrix_set_color(index, RGB_HIGHLIGHT);
                             break;
                         case 2:
-                            rgb_matrix_set_color(index, 0xa2, 0x00, 0xff);
+                            rgb_matrix_set_color(index, RGB_RED);
                             break;
                         case 3:
                             rgb_matrix_set_color(index, RGB_BLUE);
                             break;
                         default:
-                            rgb_matrix_set_color(index, RGB_OFF);
+                            rgb_default_or_off(index, layer, keypos, configColor);
                             break;
                     }
 
-                  } else if (keymap_key_to_keycode(layer, keypos) == KC_TRNS) {
-                    rgb_matrix_set_color(index, configColor.r, configColor.g, configColor.b);
-                  } else if (keymap_key_to_keycode(layer, keypos) == KC_NO) {
-                    rgb_matrix_set_color(index, RGB_OFF);
+                  } else {
+                    rgb_default_or_off(index, layer, keypos, configColor);
                   }
                 }
             }
